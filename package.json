@@ -1,27 +1,28 @@
 {
-  "name": "electron-quick-start-typescript",
-  "version": "1.0.0",
-  "description": "A minimal Electron application written with Typescript",
+  "name": "electron-thread",
+  "version": "1.0.2",
+  "description": "Electron thread workers using BrowserWindow headless windows",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "prepublish": "tsc",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "publish": "tsc && npm pack && npm publish",
     "start": "npm run build && electron ./dist/main.js"
   },
-  "repository": "https://github.com/electron/electron-quick-start-typescript",
+  "repository": "https://github.com/theCele/electron-thread.git",
   "keywords": [
     "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo",
+    "thread",
+    "worker",
+    "headless",
     "typescript"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "Cvetko Stavreski",
+  "license": "CC0 1.0 Universal",
   "devDependencies": {
-    "electron": "^6.0.8",
-    "tslint": "^5.19.0",
-    "typescript": "^3.6.0"
+    "electron": "^8.1.1",
+    "typescript": "^3.8.3"
   }
 }

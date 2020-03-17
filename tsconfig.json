@@ -1,10 +1,16 @@
 {
   "compilerOptions": {
+    "target": "es2019",
     "module": "commonjs",
+    "lib": ["dom", "es2019"],
     "noImplicitAny": true,
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
+    "strict": true,
+    "declaration": true,
+    "strictPropertyInitialization": false,
+    "moduleResolution": "node",
     "paths": {
       "*": ["node_modules/*"]
     }

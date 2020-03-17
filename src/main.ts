@@ -1,20 +1,24 @@
 import { app, BrowserWindow } from "electron";
+import './index';
 import * as path from "path";
 
-let mainWindow: Electron.BrowserWindow;
+let mainWindow: Electron.BrowserWindow | null;
 
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      backgroundThrottling: false,
+      nodeIntegrationInSubFrames: true,
+      nodeIntegrationInWorker: true
     },
     width: 800,
   });
 
   // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, "../index.html"));
+  mainWindow.loadFile(path.join(path.join(__dirname, '..', 'src', "index.html")));
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();

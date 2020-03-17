@@ -1,53 +1,121 @@
-# electron-quick-start-typescript
+# Electron Thread
 
-**Clone and run for a quick way to see Electron in action.**
+**Electron workers using BrowserWindow headless window**
 
-This is a typescript port of the [Electron Quick Start repo](https://github.com/electron/electron-quick-start) -- a minimal Electron application based on the [Quick Start Guide](http://electron.atom.io/docs/tutorial/quick-start) within the Electron documentation.
+This package allows you to use multithreading in Electron. This type of multithreading allows you to use [NODE JS API](https://nodejs.org/docs/latest/api/) and [Electron API](https://www.electronjs.org/docs/api)
 
-**Use this app along with the [Electron API Demos](http://electron.atom.io/#get-started) app for API code examples to help you get started.**
-
-A basic Electron application needs just these files:
-
-- `package.json` - Points to the app's main file and lists its details and dependencies.
-- `main.ts` - Starts the app and creates a browser window to render HTML. This is the app's **main process**.
-- `index.html` - A web page to render. This is the app's **renderer process**.
-
-You can learn more about each of these components within the [Quick Start Guide](http://electron.atom.io/docs/tutorial/quick-start).
-
-## To Use
-
-To clone and run this repository you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+## Install
 
 ```bash
-# Clone this repository
-git clone https://github.com/electron/electron-quick-start-typescript
-# Go into the repository
-cd electron-quick-start-typescript
-# Install dependencies
-npm install
-# Run the app
-npm start
+npm install --save electron-thread
+```
+
+In you Electron start file import
+main.js
+```bash
+import 'electron-thread';
+```
+
+## Example
+
+In you Electron start file import
+main.js
+```bash
+import 'electron-thread';
+```
+
+Given a file in renderer, child.thread.js:
+
+```bash
+# Import the ThreadExport class
+import { ThreadExport } from "electron-thread";
+
+# Write your methods
+function getProcessId(paramOne, paramTwo) {
+    return `${paramOne}:${paramTwo} ${process.pid}`;
+}
+
+# Register your methods
+ThreadExport.export({
+    getSystemInfo: getSystemInfo,
+    getProcessId: getProcessId
+});
+```
+
+And a renderer file where we call:
+
+```bash
+# Import the ElectronThread class
+import { ElectronThread } from "electron-thread";
+
+# initialise using your relative path to child.thread.js and resolve the path with require.resolve()
+let electronThread = new ElectronThread({
+    module: require.resolve('./child.thread')
+});
+
+let test = async () => {
+    return new Promise((resolve, reject) => {
+        let promises = [];
+        for (var i = 0; i < 100; i++) {
+            let r = electronThread.run({
+                method: 'getProcessId',
+                parameters: ['#', i + 1]
+            });
+            promises.push(r);
+        }
+        console.log(promises);
+        Promise.all(promises)
+        .then(r => resolve(r))
+        .catch(e => reject(e));
+    })
+}
+
+test()
+.then((e) => { electronThread.end(); console.log(e); })
+.catch(err => console.log(err));
+```
+
+We'll get an output something like the following:
+
+```bash
+"#:1 13560"
+"#:2 21980"
+"#:3 21868"
+"#:4 22712"
+"#:5 2476"
+"#:6 15936"
+"#:7 19140"
+"#:8 14928"
+"#:9 12992"
+"#:10 22132"
 ```
 
 Note: If you're using Linux Bash for Windows, [see this guide](https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/) or use `node` from the command prompt.
 
-## Re-compile automatically
+## API
 
-To recompile automatically and to allow using [electron-reload](https://github.com/yan-foto/electron-reload), run this in a separate terminal:
+The module classe ElectronThread has two methods run(options) and end()
 
+Class ElectronThread
 ```bash
-npm run watch
+let thread = new ElectronThread({
+    module: require.resolve('relative path to the child thread')
+})
 ```
 
-## Resources for Learning Electron
+ElectronThread.run(options) : Promise<any>. It launches the method and returns a promise
+```bash
+let options = {
+    method: 'someMethod', //method name from the exported from child thread
+    parameters: ['#', i + 1] // method parameters
+}
+thread.run(options)
+.then((result) => console.log(result))
+.catch((err) => console.log(err))
+```
+ElectronThread.end() : Promise<void>. It ends all active processes
 
-- [electron.atom.io/docs](http://electron.atom.io/docs) - all of Electron's documentation
-- [electron.atom.io/community/#boilerplates](http://electron.atom.io/community/#boilerplates) - sample starter apps created by the community
-- [electron/electron-quick-start](https://github.com/electron/electron-quick-start) - a very basic starter Electron app
-- [electron/simple-samples](https://github.com/electron/simple-samples) - small applications with ideas for taking them further
-- [electron/electron-api-demos](https://github.com/electron/electron-api-demos) - an Electron app that teaches you how to use Electron
-- [hokein/electron-sample-apps](https://github.com/hokein/electron-sample-apps) - small demo apps for the various Electron APIs
+### Inspiration
 
-## License
-
-[CC0 1.0 (Public Domain)](LICENSE.md)
+- [worker-farm](https://www.npmjs.com/package/worker-farm) - Worker Farm
+- [workerpool](https://www.npmjs.com/package/workerpool) - Workerpool
