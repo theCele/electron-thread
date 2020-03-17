@@ -37,7 +37,6 @@ function getProcessId(paramOne, paramTwo) {
 
 # Register your methods
 ThreadExport.export({
-    getSystemInfo: getSystemInfo,
     getProcessId: getProcessId
 });
 ```
