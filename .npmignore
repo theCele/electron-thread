@@ -1,5 +1,4 @@
 node_modules
-*.tgz
 
 src/index.html
 dist/index.html
