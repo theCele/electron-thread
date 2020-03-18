@@ -20,7 +20,7 @@
     "typescript"
   ],
   "author": "Cvetko Stavreski",
-  "license": "CC0 1.0 Universal",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^8.1.1",
     "typescript": "^3.8.3"
