@@ -11,7 +11,9 @@ var electron_thread_export_1 = require("./lib/electron-thread-export");
 exports.ThreadExport = electron_thread_export_1.ThreadExport;
 var electron_thread_1 = require("./lib/electron-thread");
 exports.ElectronThread = electron_thread_1.ElectronThread;
-electron_1.app.on('ready', () => {
-    electron_thread_register_1.ThreadRegister.register();
-});
+if (electron_1.app) {
+    electron_1.app.on('ready', () => {
+        electron_thread_register_1.ThreadRegister.register();
+    });
+}
 //# sourceMappingURL=index.js.map
