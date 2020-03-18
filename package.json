@@ -1,6 +1,6 @@
 {
   "name": "electron-thread",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Electron thread workers using BrowserWindow headless windows",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -9,6 +9,8 @@ export { IThreadLaunchOptions, IThreadRunOptions } from './lib/ielectron-thread-
 export { ThreadExport } from './lib/electron-thread-export';
 export { ElectronThread } from './lib/electron-thread';
 
-app.on('ready', () => {
-    ThreadRegister.register();
-});
+if (app) {
+    app.on('ready', () => {
+        ThreadRegister.register();
+    });
+}
