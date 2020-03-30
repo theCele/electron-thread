@@ -2,10 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 class Thread {
-    constructor(module) {
+    constructor(module, parentWebContents) {
         this._errorsCounter = 0;
         this._errorsCounterMax = 3;
         this.module = module;
+        this.parent = electron_1.BrowserWindow.getAllWindows().find(w => w.webContents.id === parentWebContents.id);
         this.id = ((Date.now() * Math.random()) / Math.random()) * Math.random();
         this.channel = `${this.module}:${this.id}`;
         this.createWindow();
@@ -23,10 +24,13 @@ class Thread {
     createWindow() {
         this.window = new electron_1.BrowserWindow({
             show: false,
+            parent: this.parent,
             webPreferences: {
                 preload: this.module,
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
+                nodeIntegrationInSubFrames: true,
+                devTools: true,
                 backgroundThrottling: false
             }
         });
@@ -102,7 +106,7 @@ class Thread {
         this.window.webContents.on('ipc-message', (event, channel) => {
             if (channel === 'thread-preloader:module-close') {
                 try {
-                    this.window.close();
+                    //this.window.close();
                 }
                 catch (err) { }
             }
@@ -110,16 +114,17 @@ class Thread {
     }
 }
 class ElectronThreadService {
-    constructor(options) {
+    constructor(options, parentWebContents) {
         this.threads = [];
         this.id = ((Date.now() * Math.random()) / Math.random()) * Math.random();
         this.options = options;
         this.channel = `${options.module}:${this.id}`;
+        this.parentWebContents = parentWebContents;
         this.handle();
     }
     handle() {
         electron_1.ipcMain.handle(`${this.channel}:work`, async (_event, args) => {
-            let thread = new Thread(this.options.module);
+            let thread = new Thread(this.options.module, this.parentWebContents);
             this.threads.push(thread);
             this.runOptions = args;
             thread.window.webContents.on('ipc-message-sync', (event, channel, ...args) => {

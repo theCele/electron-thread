@@ -6,7 +6,7 @@ import { IThreadLaunchOptions } from './ielectron-thread-options';
 export class ThreadRegister {
     static register(): void {
         ipcMain.handle('thread:register', (event: IpcMainInvokeEvent, options: IThreadLaunchOptions) => {
-            let electronThread = new ElectronThreadService(options);
+            let electronThread = new ElectronThreadService(options, event.sender);
             threads.push(electronThread);
             return electronThread.channel;
         });

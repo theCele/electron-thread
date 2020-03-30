@@ -6,7 +6,7 @@ const electron_thread_service_1 = require("./electron-thread-service");
 class ThreadRegister {
     static register() {
         electron_1.ipcMain.handle('thread:register', (event, options) => {
-            let electronThread = new electron_thread_service_1.ElectronThreadService(options);
+            let electronThread = new electron_thread_service_1.ElectronThreadService(options, event.sender);
             index_1.threads.push(electronThread);
             return electronThread.channel;
         });

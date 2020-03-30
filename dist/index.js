@@ -16,4 +16,12 @@ if (electron_1.app) {
         electron_thread_register_1.ThreadRegister.register();
     });
 }
+if (electron_1.ipcRenderer) {
+    electron_1.ipcRenderer.on('electron-thread:console.log', (event, message) => {
+        console.log(message);
+    });
+    electron_1.ipcRenderer.on('electron-thread:console.error', (event, error) => {
+        console.error(error);
+    });
+}
 //# sourceMappingURL=index.js.map

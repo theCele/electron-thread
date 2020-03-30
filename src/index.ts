@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { app, ipcRenderer } from 'electron';
 import { ElectronThreadService } from "./lib/electron-thread-service";
 import { ThreadRegister } from "./lib/electron-thread-register";
 
@@ -12,5 +12,14 @@ export { ElectronThread } from './lib/electron-thread';
 if (app) {
     app.on('ready', () => {
         ThreadRegister.register();
+    });
+}
+
+if (ipcRenderer) {
+    ipcRenderer.on('electron-thread:console.log', (event, message) => {
+        console.log(message);
+    });
+    ipcRenderer.on('electron-thread:console.error', (event, error) => {
+        console.error(error);
     });
 }

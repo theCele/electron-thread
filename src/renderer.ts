@@ -1,10 +1,27 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
+import * as path from 'path';
+import * as et from "./index";
+import { remote } from 'electron';
 
-import { ElectronThread } from "./lib/electron-thread";
+let packagePath = null;
+const searchPaths = ['app', 'app.asar', 'default_app.asar']
+for (packagePath of searchPaths) {
+  try {
+    packagePath = path.join(process.resourcesPath, packagePath)
+    break
+  } catch (error) {
+    continue
+  }
+}
 
-let electronThread = new ElectronThread({
+console.log(packagePath);
+
+console.log(remote.getCurrentWindow().webContents.id);
+console.log(remote.getCurrentWindow().id);
+
+let electronThread = new et.ElectronThread({
     module: require.resolve('./renderer.thread')
 });
 

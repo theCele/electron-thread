@@ -9,7 +9,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "publish": "tsc && npm pack && npm publish",
-    "start": "npm run build && electron ./dist/main.js"
+    "dev:test": "npm run build && electron ./dist/main.js"
   },
   "repository": "https://github.com/theCele/electron-thread.git",
   "keywords": [

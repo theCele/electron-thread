@@ -1,9 +1,10 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, WebContents } from 'electron';
 import { IThreadLaunchOptions, IThreadRunOptions } from './ielectron-thread-options';
 
 class Thread {
     public id: number;
     public module: string;
+    public parent: BrowserWindow;
     public window: BrowserWindow;
     public channel: string;
     private _errorsCounter: number = 0;
@@ -20,8 +21,9 @@ class Thread {
     }
     
 
-    constructor(module: string) {
+    constructor(module: string, parentWebContents: WebContents) {
         this.module = module;
+        this.parent = BrowserWindow.getAllWindows().find(w => w.webContents.id === parentWebContents.id) as BrowserWindow;
         this.id = ((Date.now() * Math.random()) / Math.random()) * Math.random();
         this.channel = `${this.module}:${this.id}`;
         this.createWindow();
@@ -30,10 +32,13 @@ class Thread {
     private createWindow() {
         this.window = new BrowserWindow({
             show: false,
+            parent: this.parent,
             webPreferences: {
                 preload: this.module,
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
+                nodeIntegrationInSubFrames: true,
+                devTools: true,
                 backgroundThrottling: false
             }
         });
@@ -96,7 +101,7 @@ class Thread {
         this.window.webContents.on('ipc-message', (event, channel) => {
             if (channel === 'thread-preloader:module-close') {
                 try {
-                    this.window.close();
+                    //this.window.close();
                 } catch (err) { }
             }
         });
@@ -105,20 +110,22 @@ class Thread {
 
 export class ElectronThreadService {
     public id: number;
+    public parentWebContents: WebContents;
     private options: IThreadLaunchOptions;
     private runOptions: IThreadRunOptions;
     public channel: string;
     private threads: Thread[] = [];
-    constructor(options: IThreadLaunchOptions) {
+    constructor(options: IThreadLaunchOptions, parentWebContents: WebContents) {
         this.id = ((Date.now() * Math.random()) / Math.random()) * Math.random();
         this.options = options;
         this.channel = `${options.module}:${this.id}`;
+        this.parentWebContents = parentWebContents;
         this.handle();
     }
 
     handle() {
         ipcMain.handle(`${this.channel}:work`, async (_event, args: IThreadRunOptions): Promise<string> => {
-            let thread = new Thread(this.options.module)
+            let thread = new Thread(this.options.module, this.parentWebContents);
             this.threads.push(thread);
 
             this.runOptions = args;

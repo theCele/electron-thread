@@ -1,3 +1,5 @@
+import { BrowserWindow } from "electron";
+
 export interface IThreadRunOptions {
     method: string;
     parameters: any [];
