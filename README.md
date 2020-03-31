@@ -4,6 +4,8 @@
 
 This package allows you to use multithreading in Electron. This type of multithreading allows you to use [NODE JS API](https://nodejs.org/docs/latest/api/) and [Electron API](https://www.electronjs.org/docs/api)
 
+Note: this module has to be used in the renderer process and the thread to be invoked in the renderer process. Also make sure you register the module in the main module `import 'electron-thread'` and also import `import * as et from "electron-thread"` like this or if you prefer to import classes separetely, you have to register the module as well `import 'electron-thread'`;
+
 ## Install
 
 ```bash
@@ -45,10 +47,10 @@ And a renderer file where we call:
 
 ```bash
 # Import the ElectronThread class
-import { ElectronThread } from "electron-thread";
+import * as et from "electron-thread";
 
 # initialise using your relative path to child.thread.js and resolve the path with require.resolve()
-let electronThread = new ElectronThread({
+let electronThread = new et.ElectronThread({
     module: require.resolve('./child.thread')
 });
 
