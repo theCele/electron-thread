@@ -35,105 +35,22 @@ class Thread {
         this.threadLaunchOptions = launchOptions;
         this.id = ((Date.now() * Math.random()) / Math.random()) * Math.random();
         this.channel = `${this.threadLaunchOptions.module}:${this.id}`;
-        this.callTime(this.threadLaunchOptions.options.maxCallTime)
+        this.callTime();
         this.createWindow();
     }
 
     private createWindow() {
         this.window = new BrowserWindow(this.threadLaunchOptions.options?.windowOptions);
         this.window.loadFile(__dirname + '/thread.html');
-        this.errorHandlingEvents();
-    }
-    private errorHandlingEvents() {
-        // this.window?.webContents.on('did-fail-load', () => {
-        //     if (this.window) {
-        //         try {
-        //             if (this.valid) { 
-        //                 this.window.reload();
-        //             } else {
-        //                 this.window.close();
-        //                 console.error(new Error(`ProcessTerminatedError with code:${'did-fail-load'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
-        //                 this.window = null;
-        //             }
-        //         } catch (err) {
-        //             this.window = null;
-        //         }
-        //     };
-        // });
-        // this.window?.webContents.on('crashed', () => {
-        //     if (this.window) {
-        //         try {
-        //             if (this.valid) { 
-        //                 this.window.reload();
-        //             } else {
-        //                 this.window.close();
-        //                 console.error(new Error(`ProcessTerminatedError with code:${'crashed'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
-        //                 this.window = null;
-        //             }
-        //         } catch (err) {
-        //             this.window = null;
-        //         }
-        //     };
-        // });
-        // this.window?.webContents.on('unresponsive', () => {
-        //     if (this.window) {
-        //         try {
-        //             if (this.valid) { 
-        //                 this.window.reload();
-        //             } else {
-        //                 this.window.close();
-        //                 console.error(new Error(`ProcessTerminatedError with code:${'unresponsive'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
-        //                 this.window = null;
-        //             }
-        //         } catch (err) {
-        //             this.window = null;
-        //         }
-        //     };
-        // });
-        // this.window?.webContents.on('destroyed', () => {
-        //     if (this.window) {
-        //         try {
-        //             this.window.close();
-        //             this.window = null;
-        //         } catch (err) {
-        //             this.window = null;
-        //         }
-        //     };
-        // });
-        // this.window?.webContents.on('preload-error', () => {
-        //     if (this.window) {
-        //         try {
-        //             if (this.valid) { 
-        //                 this.window.reload();
-        //             } else {
-        //                 this.window.close();
-        //                 console.error(new Error(`ProcessTerminatedError with code:${'preload-error'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
-        //                 this.window = null;
-        //             }
-        //         } catch (err) {
-        //             this.window = null;
-        //         }
-        //     };
-        // });
-        // this.window?.webContents.on('ipc-message', (event, channel) => {
-        //     if (channel === 'thread-preloader:module-close') {
-        //         try {
-        //             this.window?.close();
-        //             this.window = null;
-        //         } catch (err) {
-        //             this.window = null;
-        //         }
-        //     }
-        // });
     }
     end(): void {
         this.window?.close();
         this.window = null;
     }
 
-    private callTime(timeout: number) {
+    callTime(): Promise<VoidFunction> {
         return new Promise((resolve, reject) => {
-            if (timeout < Infinity) {
+            if (this.threadLaunchOptions.options.maxCallTime < Infinity) {
                 let time = setTimeout(() => {
                     if (this.window) {
                         this.window?.close();
@@ -143,7 +60,7 @@ class Thread {
                         clearTimeout(time);
                         resolve();
                     }
-                }, timeout);
+                }, this.threadLaunchOptions.options.maxCallTime);
             } else {
                 resolve();
             }
