@@ -39,103 +39,86 @@ class Thread {
         this.errorHandlingEvents();
     }
     errorHandlingEvents() {
-        var _a, _b, _c, _d, _e, _f;
-        (_a = this.window) === null || _a === void 0 ? void 0 : _a.webContents.on('did-fail-load', () => {
-            if (this.window) {
-                try {
-                    if (this.valid) {
-                        this.window.reload();
-                    }
-                    else {
-                        this.window.close();
-                        console.error(new Error(`ProcessTerminatedError with code:${'did-fail-load'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
-                        this.window = null;
-                    }
-                }
-                catch (err) {
-                    this.window = null;
-                }
-            }
-            ;
-        });
-        (_b = this.window) === null || _b === void 0 ? void 0 : _b.webContents.on('crashed', () => {
-            if (this.window) {
-                try {
-                    if (this.valid) {
-                        this.window.reload();
-                    }
-                    else {
-                        this.window.close();
-                        console.error(new Error(`ProcessTerminatedError with code:${'crashed'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
-                        this.window = null;
-                    }
-                }
-                catch (err) {
-                    this.window = null;
-                }
-            }
-            ;
-        });
-        (_c = this.window) === null || _c === void 0 ? void 0 : _c.webContents.on('unresponsive', () => {
-            if (this.window) {
-                try {
-                    if (this.valid) {
-                        this.window.reload();
-                    }
-                    else {
-                        this.window.close();
-                        console.error(new Error(`ProcessTerminatedError with code:${'unresponsive'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
-                        this.window = null;
-                    }
-                }
-                catch (err) {
-                    this.window = null;
-                }
-            }
-            ;
-        });
-        (_d = this.window) === null || _d === void 0 ? void 0 : _d.webContents.on('destroyed', () => {
-            if (this.window) {
-                try {
-                    this.window.close();
-                    this.window = null;
-                }
-                catch (err) {
-                    this.window = null;
-                }
-            }
-            ;
-        });
-        (_e = this.window) === null || _e === void 0 ? void 0 : _e.webContents.on('preload-error', () => {
-            if (this.window) {
-                try {
-                    if (this.valid) {
-                        this.window.reload();
-                    }
-                    else {
-                        this.window.close();
-                        console.error(new Error(`ProcessTerminatedError with code:${'preload-error'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
-                        this.window = null;
-                    }
-                }
-                catch (err) {
-                    this.window = null;
-                }
-            }
-            ;
-        });
-        (_f = this.window) === null || _f === void 0 ? void 0 : _f.webContents.on('ipc-message', (event, channel) => {
-            var _a;
-            if (channel === 'thread-preloader:module-close') {
-                try {
-                    (_a = this.window) === null || _a === void 0 ? void 0 : _a.close();
-                    this.window = null;
-                }
-                catch (err) {
-                    this.window = null;
-                }
-            }
-        });
+        // this.window?.webContents.on('did-fail-load', () => {
+        //     if (this.window) {
+        //         try {
+        //             if (this.valid) { 
+        //                 this.window.reload();
+        //             } else {
+        //                 this.window.close();
+        //                 console.error(new Error(`ProcessTerminatedError with code:${'did-fail-load'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
+        //                 this.window = null;
+        //             }
+        //         } catch (err) {
+        //             this.window = null;
+        //         }
+        //     };
+        // });
+        // this.window?.webContents.on('crashed', () => {
+        //     if (this.window) {
+        //         try {
+        //             if (this.valid) { 
+        //                 this.window.reload();
+        //             } else {
+        //                 this.window.close();
+        //                 console.error(new Error(`ProcessTerminatedError with code:${'crashed'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
+        //                 this.window = null;
+        //             }
+        //         } catch (err) {
+        //             this.window = null;
+        //         }
+        //     };
+        // });
+        // this.window?.webContents.on('unresponsive', () => {
+        //     if (this.window) {
+        //         try {
+        //             if (this.valid) { 
+        //                 this.window.reload();
+        //             } else {
+        //                 this.window.close();
+        //                 console.error(new Error(`ProcessTerminatedError with code:${'unresponsive'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
+        //                 this.window = null;
+        //             }
+        //         } catch (err) {
+        //             this.window = null;
+        //         }
+        //     };
+        // });
+        // this.window?.webContents.on('destroyed', () => {
+        //     if (this.window) {
+        //         try {
+        //             this.window.close();
+        //             this.window = null;
+        //         } catch (err) {
+        //             this.window = null;
+        //         }
+        //     };
+        // });
+        // this.window?.webContents.on('preload-error', () => {
+        //     if (this.window) {
+        //         try {
+        //             if (this.valid) { 
+        //                 this.window.reload();
+        //             } else {
+        //                 this.window.close();
+        //                 console.error(new Error(`ProcessTerminatedError with code:${'preload-error'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`))
+        //                 this.window = null;
+        //             }
+        //         } catch (err) {
+        //             this.window = null;
+        //         }
+        //     };
+        // });
+        // this.window?.webContents.on('ipc-message', (event, channel) => {
+        //     if (channel === 'thread-preloader:module-close') {
+        //         try {
+        //             this.window?.close();
+        //             this.window = null;
+        //         } catch (err) {
+        //             this.window = null;
+        //         }
+        //     }
+        // });
     }
     end() {
         var _a;
@@ -147,15 +130,44 @@ class Thread {
             if (timeout < Infinity) {
                 let time = setTimeout(() => {
                     var _a;
-                    (_a = this.window) === null || _a === void 0 ? void 0 : _a.close();
-                    clearTimeout(time);
-                    reject(new Error(`TimeoutError module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
+                    if (this.window) {
+                        (_a = this.window) === null || _a === void 0 ? void 0 : _a.close();
+                        clearTimeout(time);
+                        resolve();
+                    }
+                    else {
+                        clearTimeout(time);
+                        resolve();
+                    }
                 }, timeout);
             }
             else {
                 resolve();
             }
         });
+    }
+    throwError(code) {
+        let message = new Error(`ProcessTerminatedError with code:${code} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`);
+        if (this.window) {
+            try {
+                if (this.valid) {
+                    this.window.reload();
+                    return undefined;
+                }
+                else {
+                    this.window.close();
+                    this.window = null;
+                    return message;
+                }
+            }
+            catch (err) {
+                this.window = null;
+                return message;
+            }
+        }
+        else {
+            return undefined;
+        }
     }
 }
 class ElectronThread {
@@ -168,14 +180,17 @@ class ElectronThread {
     }
     run(options) {
         return new Promise((resolve, reject) => {
-            var _a, _b;
+            var _a, _b, _c, _d, _e, _f, _g;
             let thread = new Thread(new ielectron_thread_options_1.ThreadLaunchOptions(this.options, options, electron_1.remote.getCurrentWindow()));
             this.threads.push(thread);
+            //#region IPC SYNC
             (_a = thread.window) === null || _a === void 0 ? void 0 : _a.webContents.on('ipc-message-sync', (event, channel, ...args) => {
                 if (channel === 'thread-preloader:module-parameters') {
                     event.returnValue = options;
                 }
             });
+            //#endregion
+            //#region IPC
             (_b = thread.window) === null || _b === void 0 ? void 0 : _b.webContents.on('ipc-message', (event, channel, ...args) => {
                 if (channel === 'electron-thread:console.log') {
                     console.log(...args);
@@ -192,6 +207,39 @@ class ElectronThread {
                     reject(...args);
                 }
             });
+            //#endregion
+            //#region ERROR HANDLER
+            (_c = thread.window) === null || _c === void 0 ? void 0 : _c.webContents.on('did-fail-load', () => {
+                let error = thread.throwError('did-fail-load');
+                if (error) {
+                    reject(error);
+                }
+            });
+            (_d = thread.window) === null || _d === void 0 ? void 0 : _d.webContents.on('crashed', () => {
+                let error = thread.throwError('crashed');
+                if (error) {
+                    reject(error);
+                }
+            });
+            (_e = thread.window) === null || _e === void 0 ? void 0 : _e.webContents.on('unresponsive', () => {
+                let error = thread.throwError('unresponsive');
+                if (error) {
+                    reject(error);
+                }
+            });
+            (_f = thread.window) === null || _f === void 0 ? void 0 : _f.webContents.on('destroyed', () => {
+                let error = thread.throwError('destroyed');
+                if (error) {
+                    reject(error);
+                }
+            });
+            (_g = thread.window) === null || _g === void 0 ? void 0 : _g.webContents.on('preload-error', () => {
+                let error = thread.throwError('preload-error');
+                if (error) {
+                    reject(error);
+                }
+            });
+            //#endregion
         });
     }
     end() {
