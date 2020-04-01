@@ -1,37 +1,208 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const electron = require("electron");
 const electron_1 = require("electron");
+const BrowserWindow = (electron_1.remote) ? electron_1.remote.BrowserWindow : electron.BrowserWindow;
+const ielectron_thread_options_1 = require("./ielectron-thread-options");
+class Thread {
+    constructor(launchOptions) {
+        this._errorsCounter = 0;
+        this.threadLaunchOptions = launchOptions;
+        this.id = ((Date.now() * Math.random()) / Math.random()) * Math.random();
+        this.channel = `${this.threadLaunchOptions.module}:${this.id}`;
+        this.callTime(this.threadLaunchOptions.options.maxCallTime);
+        this.createWindow();
+    }
+    get valid() {
+        this._errorsCounter++;
+        if (this._errorsCounter > this.threadLaunchOptions.options.maxRetries) {
+            this._valid = false;
+        }
+        else {
+            this._valid = true;
+        }
+        return this._valid;
+    }
+    get running() {
+        if (this.window) {
+            this._running = true;
+        }
+        else {
+            this._running = false;
+        }
+        return this._running;
+    }
+    createWindow() {
+        var _a;
+        this.window = new BrowserWindow((_a = this.threadLaunchOptions.options) === null || _a === void 0 ? void 0 : _a.windowOptions);
+        this.window.loadFile(__dirname + '/thread.html');
+        this.errorHandlingEvents();
+    }
+    errorHandlingEvents() {
+        var _a, _b, _c, _d, _e, _f;
+        (_a = this.window) === null || _a === void 0 ? void 0 : _a.webContents.on('did-fail-load', () => {
+            if (this.window) {
+                try {
+                    if (this.valid) {
+                        this.window.reload();
+                    }
+                    else {
+                        this.window.close();
+                        console.error(new Error(`ProcessTerminatedError with code:${'did-fail-load'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
+                        this.window = null;
+                    }
+                }
+                catch (err) {
+                    this.window = null;
+                }
+            }
+            ;
+        });
+        (_b = this.window) === null || _b === void 0 ? void 0 : _b.webContents.on('crashed', () => {
+            if (this.window) {
+                try {
+                    if (this.valid) {
+                        this.window.reload();
+                    }
+                    else {
+                        this.window.close();
+                        console.error(new Error(`ProcessTerminatedError with code:${'crashed'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
+                        this.window = null;
+                    }
+                }
+                catch (err) {
+                    this.window = null;
+                }
+            }
+            ;
+        });
+        (_c = this.window) === null || _c === void 0 ? void 0 : _c.webContents.on('unresponsive', () => {
+            if (this.window) {
+                try {
+                    if (this.valid) {
+                        this.window.reload();
+                    }
+                    else {
+                        this.window.close();
+                        console.error(new Error(`ProcessTerminatedError with code:${'unresponsive'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
+                        this.window = null;
+                    }
+                }
+                catch (err) {
+                    this.window = null;
+                }
+            }
+            ;
+        });
+        (_d = this.window) === null || _d === void 0 ? void 0 : _d.webContents.on('destroyed', () => {
+            if (this.window) {
+                try {
+                    this.window.close();
+                    this.window = null;
+                }
+                catch (err) {
+                    this.window = null;
+                }
+            }
+            ;
+        });
+        (_e = this.window) === null || _e === void 0 ? void 0 : _e.webContents.on('preload-error', () => {
+            if (this.window) {
+                try {
+                    if (this.valid) {
+                        this.window.reload();
+                    }
+                    else {
+                        this.window.close();
+                        console.error(new Error(`ProcessTerminatedError with code:${'preload-error'} module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
+                        this.window = null;
+                    }
+                }
+                catch (err) {
+                    this.window = null;
+                }
+            }
+            ;
+        });
+        (_f = this.window) === null || _f === void 0 ? void 0 : _f.webContents.on('ipc-message', (event, channel) => {
+            var _a;
+            if (channel === 'thread-preloader:module-close') {
+                try {
+                    (_a = this.window) === null || _a === void 0 ? void 0 : _a.close();
+                    this.window = null;
+                }
+                catch (err) {
+                    this.window = null;
+                }
+            }
+        });
+    }
+    end() {
+        var _a;
+        (_a = this.window) === null || _a === void 0 ? void 0 : _a.close();
+        this.window = null;
+    }
+    callTime(timeout) {
+        return new Promise((resolve, reject) => {
+            if (timeout < Infinity) {
+                let time = setTimeout(() => {
+                    var _a;
+                    (_a = this.window) === null || _a === void 0 ? void 0 : _a.close();
+                    clearTimeout(time);
+                    reject(new Error(`TimeoutError module:${this.threadLaunchOptions.module} method:${this.threadLaunchOptions.method}`));
+                }, timeout);
+            }
+            else {
+                resolve();
+            }
+        });
+    }
+}
 class ElectronThread {
     constructor(options) {
+        this.threads = [];
         this.options = options;
+    }
+    get activeThreads() {
+        return this.threads.filter(t => t.running == true).length;
     }
     run(options) {
         return new Promise((resolve, reject) => {
-            electron_1.ipcRenderer.invoke('thread:register', this.options)
-                .then((channel) => {
-                this.channel = channel;
-                electron_1.ipcRenderer.invoke(`${channel}:work`, options)
-                    .then((channel) => {
-                    electron_1.ipcRenderer.invoke(`${channel}:return`)
-                        .then(result => {
-                        resolve(result);
-                    })
-                        .catch(err => reject(err));
-                })
-                    .catch(err => reject(err));
-            })
-                .catch(err => reject(err));
+            var _a, _b;
+            let thread = new Thread(new ielectron_thread_options_1.ThreadLaunchOptions(this.options, options, electron_1.remote.getCurrentWindow()));
+            this.threads.push(thread);
+            (_a = thread.window) === null || _a === void 0 ? void 0 : _a.webContents.on('ipc-message-sync', (event, channel, ...args) => {
+                if (channel === 'thread-preloader:module-parameters') {
+                    event.returnValue = options;
+                }
+            });
+            (_b = thread.window) === null || _b === void 0 ? void 0 : _b.webContents.on('ipc-message', (event, channel, ...args) => {
+                if (channel === 'electron-thread:console.log') {
+                    console.log(...args);
+                }
+                else if (channel === 'electron-thread:console.error') {
+                    console.error(...args);
+                }
+                else if (channel === 'thread-preloader:module-return') {
+                    thread.end();
+                    resolve(...args);
+                }
+                else if (channel === 'thread-preloader:module-error') {
+                    thread.end();
+                    reject(...args);
+                }
+            });
         });
     }
     end() {
         return new Promise(resolve => {
-            electron_1.ipcRenderer.invoke(`${this.channel}:end`)
-                .then(() => {
-                resolve();
-            })
-                .catch(() => {
-                resolve();
-            });
+            for (let i = 0; i < this.threads.length; i++) {
+                try {
+                    this.threads[i].end();
+                }
+                catch (err) { }
+            }
+            resolve();
         });
     }
 }

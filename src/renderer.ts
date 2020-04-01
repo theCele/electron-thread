@@ -22,27 +22,35 @@ console.log(remote.getCurrentWindow().webContents.id);
 console.log(remote.getCurrentWindow().id);
 
 let electronThread = new et.ElectronThread({
-    module: require.resolve('./renderer.thread')
+    module: require.resolve('./renderer.worker'),
+    options: {
+      maxCallTime: 10000
+    }
 });
 
 let test = async () => {
-    return new Promise((resolve, reject) => {
-        let promises: Promise<string> [] = [];
-        for (var i = 0; i < 10; i++) {
-            let r = electronThread.run<string>({
-                method: 'getProcessId',
-                parameters: ['#', i + 1]
-            });
-            promises.push(r);
-        }
-        console.log(promises);
-        Promise.all(promises)
-        .then(r => resolve(r))
-        .catch(e => reject(e));
-    })
+  for (var i = 0; i < 10; i++) {
+      let r = electronThread.run<string>({
+          method: 'getProcessId',
+          parameters: ['#', i + 1]
+      });
+      r
+      .then(r => console.log(r))
+      .catch(e => console.log(e));
+  }
 }
 
-test()
-.then((e) => { electronThread.end(); console.log(e); })
-.catch(err => console.log(err));
+let test2 = () => {
+  let r = electronThread.run<string>({
+    method: 'getResponseAfter',
+    parameters: [15000]
+  });
+  r
+  .then(r => console.log(r))
+  .catch(e => console.log(e));
+}
+
+test();
+//test2();
+
 

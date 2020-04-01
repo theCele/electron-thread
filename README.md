@@ -12,21 +12,9 @@ Note: this module has to be used in the renderer process and the thread to be in
 npm install --save electron-thread
 ```
 
-In you Electron start file import
-main.js
-```bash
-import 'electron-thread';
-```
-
 ## Example
 
-In you Electron start file import
-main.js
-```bash
-import 'electron-thread';
-```
-
-Given a file in renderer, child.thread.js:
+Given a file in renderer, child.worker.js:
 
 ```bash
 # Import the ThreadExport class
@@ -47,33 +35,26 @@ And a renderer file where we call:
 
 ```bash
 # Import the ElectronThread class
-import * as et from "electron-thread";
+import { ElectronThread } from "electron-thread";
 
 # initialise using your relative path to child.thread.js and resolve the path with require.resolve()
-let electronThread = new et.ElectronThread({
-    module: require.resolve('./child.thread')
+let electronThread = new ElectronThread({
+    module: require.resolve('./child.worker')
 });
 
 let test = async () => {
-    return new Promise((resolve, reject) => {
-        let promises = [];
-        for (var i = 0; i < 100; i++) {
-            let r = electronThread.run({
-                method: 'getProcessId',
-                parameters: ['#', i + 1]
-            });
-            promises.push(r);
-        }
-        console.log(promises);
-        Promise.all(promises)
-        .then(r => resolve(r))
-        .catch(e => reject(e));
-    })
+  for (var i = 0; i < 10; i++) {
+      let r = electronThread.run<string>({
+          method: 'getProcessId',
+          parameters: ['#', i + 1]
+      });
+      r
+      .then(r => console.log(r))
+      .catch(e => console.log(e));
+  }
 }
 
-test()
-.then((e) => { electronThread.end(); console.log(e); })
-.catch(err => console.log(err));
+test();
 ```
 
 We'll get an output something like the following:
@@ -93,26 +74,82 @@ We'll get an output something like the following:
 
 ## API
 
-The module classe ElectronThread has two methods run(options) and end()
+Electron thread exports a main method `run(options: IThreadRunOptions)` and an `end()` method. The `run()` method sets up a "thread farm" of coordinated BrowserWindows.
 
-Class ElectronThread
-```bash
-let thread = new ElectronThread({
-    module: require.resolve('relative path to the child thread')
-})
-```
+### ElectronThread(options: IThreadLaunchOptions)
 
-ElectronThread.run(options) : Promise<any>. It launches the method and returns a promise
-```bash
-let options = {
-    method: 'someMethod', //method name from the exported from child thread
-    parameters: ['#', i + 1] // method parameters
+#### `options: IThreadLaunchOptions`
+
+If you don't provide an `options` object then the following defaults will be used:
+
+```js
+{
+    module              : string,
+    options             :
+                            {
+                                windowOptions: BrowserWindowConstructorOptions,
+                                maxConcurrentThreads: require('os').cpus().length,
+                                maxCallTime: Infinity,
+                                maxRetries: 10
+                            }
 }
-thread.run(options)
-.then((result) => console.log(result))
-.catch((err) => console.log(err))
 ```
-ElectronThread.end() : Promise<void>. It ends all active processes
+
+* **<code>module</code>** You should use an **absolute path** to the module file, the best way to obtain the path is with `require.resolve('./path/to/module')`.
+
+* **<code>options.windowOptions</code>** allows you to customize all the parameters passed to BrowserWindowConstructorOptions. This object supports [all possible options of `BrowserWindowConstructorOptions`](https://www.electronjs.org/docs/api/browser-window#new-browserwindowoptions).
+
+* **<code>options.maxConcurrentThreads</code>** will set the number of child processes to maintain concurrently. By default it is set to the number of CPUs available on the current system, but it can be any reasonable number, including `1`.
+
+* **<code>options.maxCallTime</code>** when set, will cap a time, in milliseconds, that *any single call* can take to execute in a worker. If this time limit is exceeded by just a single call then the worker running that call will be killed and any calls running on that worker will have their callbacks returned with a `TimeoutError` (check `err.type == 'TimeoutError'`).
+
+* **<code>options.maxCallTime</code>** allows you to control the max number of call retries after worker termination (unexpected or timeout). By default this option is set to `Infinity` which means that each call of each terminated worker will always be auto requeued. When the number of retries exceeds `maxRetries` value, the job callback will be executed with a `ProcessTerminatedError`.
+
+You initialize electron "thread farm" `let electronThread ElectronThread(options: IThreadLaunchOptions)`.
+
+### electronThread.end()
+
+It will close all threads and won't wait for the task to complete.
+
+### electronThread.run(options: IThreadRunOptions)
+
+#### `options: IThreadRunOptions`
+
+You have to specify the exported method name and the arguments
+
+```js
+{
+    method              : string,
+    parameters          : any []
+}
+```
+
+### ElectronThread(methods: Object)
+
+In the worker file we export the methods
+
+```js
+{
+    exportMethodName1   : method1,
+    exportMethodName2   : method2,
+    exportMethodNameN   : methodN,
+}
+```
+
+```bash
+# Import the ThreadExport class
+import { ThreadExport } from "electron-thread";
+
+# Write your methods
+function getProcessId(paramOne, paramTwo) {
+    return `${paramOne}:${paramTwo} ${process.pid}`;
+}
+
+# Register your methods
+ThreadExport.export({
+    getProcessId: getProcessId
+});
+```
 
 ### Inspiration
 

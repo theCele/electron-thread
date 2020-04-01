@@ -1,6 +1,6 @@
 {
   "name": "electron-thread",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "Electron thread workers using BrowserWindow headless windows",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
   "author": "Cvetko Stavreski",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^8.1.1",
+    "electron": "^8.2.0",
     "typescript": "^3.8.3"
   }
 }

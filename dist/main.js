@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
-require("./index");
 const path = require("path");
 let mainWindow;
 function createWindow() {
