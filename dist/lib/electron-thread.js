@@ -159,6 +159,16 @@ class ElectronThread {
             //#endregion
         });
     }
+    enqueue(thread) {
+        return new Promise(async (resolve) => {
+            let maxConcurrentThreads = (this.options.options) ? ((this.options.options.maxConcurrentThreads) ? this.options.options.maxConcurrentThreads : require('os').cpus().length) : require('os').cpus().length;
+            while (this.activeThreads > maxConcurrentThreads) {
+                await this.wait(500);
+            }
+            this.threads.push(thread);
+            resolve();
+        });
+    }
     end() {
         return new Promise(resolve => {
             for (let i = 0; i < this.threads.length; i++) {
@@ -168,6 +178,14 @@ class ElectronThread {
                 catch (err) { }
             }
             resolve();
+        });
+    }
+    wait(ms) {
+        return new Promise(resolve => {
+            let timeout = setTimeout(() => {
+                clearTimeout(timeout);
+                resolve();
+            }, ms);
         });
     }
 }

@@ -23,17 +23,24 @@ console.log(electron_1.remote.getCurrentWindow().id);
 let electronThread = new et.ElectronThread({
     module: require.resolve('./renderer.worker'),
     options: {
-        maxCallTime: 500
+        maxCallTime: Infinity
     }
 });
 let test = async () => {
-    for (var i = 0; i < 10; i++) {
+    let start = new Date();
+    console.log(start.getMilliseconds());
+    for (var i = 0; i < 50; i++) {
         try {
-            let r = await electronThread.run({
-                method: 'getResponseAfter',
-                parameters: [1000]
-            });
-            console.log(r);
+            electronThread.run({
+                method: 'getProcessId',
+                parameters: ['#', i]
+            })
+                .then(r => {
+                console.log(r);
+                console.log((new Date()).getMilliseconds());
+            })
+                .catch(r => console.log(r));
+            //console.log(r);
         }
         catch (err) {
             console.log(err);

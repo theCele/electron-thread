@@ -43,12 +43,13 @@ class Thread {
         this.window = new BrowserWindow(this.threadLaunchOptions.options?.windowOptions);
         this.window.loadFile(__dirname + '/thread.html');
     }
+
     end(): void {
         this.window?.close();
         this.window = null;
     }
 
-    callTime(): Promise<VoidFunction> {
+    callTime(): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.threadLaunchOptions.options.maxCallTime < Infinity) {
                 let time = setTimeout(() => {
@@ -121,7 +122,7 @@ export class ElectronThread {
                     console.error(...args);
                 } else if (channel === 'thread-preloader:module-return') {
                     thread.end();
-                    resolve(...args);
+                    resolve(args);
                 } else if (channel === 'thread-preloader:module-error') {
                     thread.end();
                     reject(...args);

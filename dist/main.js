@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = require("path");
 let mainWindow;
+console.log(setTimeout(() => { }).unref);
 function createWindow() {
     // Create the browser window.
     mainWindow = new electron_1.BrowserWindow({

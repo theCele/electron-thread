@@ -2,7 +2,7 @@ import { app, BrowserWindow } from "electron";
 import * as path from "path";
 
 let mainWindow: Electron.BrowserWindow | null;
-
+console.log((setTimeout(() => {}) as any).unref)
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
